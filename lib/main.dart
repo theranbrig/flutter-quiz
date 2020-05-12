@@ -26,16 +26,30 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   List<Widget> scoreKeeper = [];
+
   List<String> questions = [
     'You can lead a cow down stairs but not up stairs.',
     'Approximately one quarter of human bones are in the feet.',
     'A slug\'s blood is green.',
   ];
 
+  List<bool> answers = [false, true, true];
+
   int questionNumber = 0;
 
-  answerQuestion() {
-    if (questionNumber <= 1) {
+  void answerQuestion(answer) {
+    bool correctAnswer = answers[questionNumber];
+
+    if (correctAnswer == answer) {
+      setState(() {
+        scoreKeeper.add(Icon(Icons.check, color: Colors.green));
+      });
+    } else {
+      setState(() {
+        scoreKeeper.add(Icon(Icons.close, color: Colors.red));
+      });
+    }
+    if (questionNumber <= (questions.length - 2)) {
       setState(() {
         questionNumber++;
       });
@@ -78,7 +92,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                answerQuestion();
+                answerQuestion(true);
               },
             ),
           ),
@@ -97,7 +111,7 @@ class _QuizPageState extends State<QuizPage> {
               ),
               onPressed: () {
                 //The user picked false.
-                answerQuestion();
+                answerQuestion(false);
               },
             ),
           ),
