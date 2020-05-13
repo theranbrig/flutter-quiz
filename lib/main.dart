@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'question.dart';
+import 'quiz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() => runApp(Quizzler());
 
@@ -27,33 +30,55 @@ class QuizPage extends StatefulWidget {
 class _QuizPageState extends State<QuizPage> {
   List<Widget> scoreKeeper = [];
 
-  List<String> questions = [
-    'You can lead a cow down stairs but not up stairs.',
-    'Approximately one quarter of human bones are in the feet.',
-    'A slug\'s blood is green.',
-  ];
+  QuizBrain quizBrain = QuizBrain();
 
-  List<bool> answers = [false, true, true];
+  void checkAnswer(answer) {
+    bool correctAnswer = quizBrain.getQuestionAnswer();
 
-  int questionNumber = 0;
-
-  void answerQuestion(answer) {
-    bool correctAnswer = answers[questionNumber];
-
-    if (correctAnswer == answer) {
-      setState(() {
-        scoreKeeper.add(Icon(Icons.check, color: Colors.green));
-      });
-    } else {
-      setState(() {
-        scoreKeeper.add(Icon(Icons.close, color: Colors.red));
-      });
-    }
-    if (questionNumber <= (questions.length - 2)) {
-      setState(() {
-        questionNumber++;
-      });
-    }
+    setState(() {
+      if (quizBrain.isFinished()) {
+        Alert(
+          context: context,
+          type: AlertType.warning,
+          title: "GAME OVER",
+          desc: "Click restart to begin again.",
+          buttons: [
+            DialogButton(
+              child: Text(
+                "CANCEL",
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+              onPressed: () => Navigator.pop(context),
+              color: Colors.red,
+            ),
+            DialogButton(
+              child: Text(
+                "RESTART",
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+              onPressed: () {
+                setState(() {
+                  scoreKeeper = [];
+                });
+                quizBrain.reset();
+                Navigator.pop(context);
+              },
+              gradient: LinearGradient(colors: [
+                Color.fromRGBO(61, 121, 9, 1.0),
+                Color.fromRGBO(6, 129, 154, 1.0)
+              ]),
+            )
+          ],
+        ).show();
+      } else {
+        if (correctAnswer == answer) {
+          scoreKeeper.add(Icon(Icons.check, color: Colors.green));
+        } else {
+          scoreKeeper.add(Icon(Icons.close, color: Colors.red));
+        }
+      }
+      quizBrain.nextQuestion();
+    });
   }
 
   @override
@@ -68,7 +93,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                questions[questionNumber],
+                quizBrain.getQuestionText(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -92,7 +117,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                answerQuestion(true);
+                checkAnswer(true);
               },
             ),
           ),
@@ -111,13 +136,14 @@ class _QuizPageState extends State<QuizPage> {
               ),
               onPressed: () {
                 //The user picked false.
-                answerQuestion(false);
+                checkAnswer(false);
               },
             ),
           ),
         ),
         Expanded(
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: scoreKeeper,
           ),
         )
