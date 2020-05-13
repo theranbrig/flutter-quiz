@@ -3,6 +3,10 @@ import 'question.dart';
 class QuizBrain {
   int _questionNumber = 0;
 
+  int _correctCount = 0;
+
+  int _incorrectCount = 0;
+
   List<Question> _questions = [
     Question('You can lead a cow down stairs but not up stairs.', false),
     Question('Approximately one quarter of human bones are in the feet.', true),
@@ -39,18 +43,26 @@ class QuizBrain {
     }
   }
 
+  void addCorrect() {
+    _correctCount++;
+  }
+
+  void addWrong() {
+    _incorrectCount++;
+  }
+
   isFinished() {
     if (_questionNumber == _questions.length - 1) {
-      print(true);
       return true;
     } else {
-      print(false);
       return false;
     }
   }
 
   void reset() {
     _questionNumber = 0;
+    _correctCount = 0;
+    _incorrectCount = 0;
   }
 
   String getQuestionText() {
@@ -59,5 +71,13 @@ class QuizBrain {
 
   bool getQuestionAnswer() {
     return _questions[_questionNumber].questionAnswer;
+  }
+
+  int getCorrectAnswers() {
+    return _correctCount;
+  }
+
+  int getInorrectAnswers() {
+    return _incorrectCount;
   }
 }

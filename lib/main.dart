@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'question.dart';
 import 'quiz_brain.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
@@ -32,16 +31,18 @@ class _QuizPageState extends State<QuizPage> {
 
   QuizBrain quizBrain = QuizBrain();
 
+  int correct = 0;
+  int incorrect = 0;
+
   void checkAnswer(answer) {
     bool correctAnswer = quizBrain.getQuestionAnswer();
-
     setState(() {
       if (quizBrain.isFinished()) {
         Alert(
           context: context,
           type: AlertType.warning,
           title: "GAME OVER",
-          desc: "Click restart to begin again.",
+          desc: "You got $correct right answers. Click restart to begin again.",
           buttons: [
             DialogButton(
               child: Text(
@@ -61,6 +62,8 @@ class _QuizPageState extends State<QuizPage> {
                   scoreKeeper = [];
                 });
                 quizBrain.reset();
+                correct = 0;
+                incorrect = 0;
                 Navigator.pop(context);
               },
               gradient: LinearGradient(colors: [
@@ -73,11 +76,15 @@ class _QuizPageState extends State<QuizPage> {
       } else {
         if (correctAnswer == answer) {
           scoreKeeper.add(Icon(Icons.check, color: Colors.green));
+          quizBrain.addCorrect();
         } else {
           scoreKeeper.add(Icon(Icons.close, color: Colors.red));
+          quizBrain.addWrong();
         }
       }
       quizBrain.nextQuestion();
+      correct = quizBrain.getCorrectAnswers();
+      incorrect = quizBrain.getInorrectAnswers();
     });
   }
 
@@ -87,8 +94,48 @@ class _QuizPageState extends State<QuizPage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        Container(
+          color: Colors.grey[800],
+          padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(Icons.check, color: Colors.green),
+                    Text(
+                      '$correct',
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        color: Colors.white,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(Icons.close, color: Colors.red),
+                    Text(
+                      '$incorrect',
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        color: Colors.white,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
         Expanded(
-          flex: 5,
+          flex: 10,
           child: Padding(
             padding: EdgeInsets.all(10.0),
             child: Center(
@@ -104,6 +151,7 @@ class _QuizPageState extends State<QuizPage> {
           ),
         ),
         Expanded(
+          flex: 2,
           child: Padding(
             padding: EdgeInsets.all(15.0),
             child: FlatButton(
@@ -123,6 +171,7 @@ class _QuizPageState extends State<QuizPage> {
           ),
         ),
         Expanded(
+          flex: 2,
           child: Padding(
             padding: EdgeInsets.all(15.0),
             child: FlatButton(
@@ -142,6 +191,7 @@ class _QuizPageState extends State<QuizPage> {
           ),
         ),
         Expanded(
+          flex: 2,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: scoreKeeper,
